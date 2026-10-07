@@ -1,19 +1,1508 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ReplyZero — YouTube Comment Inbox</title>
-  <meta name="description" content="ReplyZero helps YouTube creators find comments they have not replied to.">
-  <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:800px;margin:70px auto;padding:0 24px;color:#16181d;line-height:1.6}h1{font-size:48px;line-height:1.05;margin-bottom:14px}.tag{color:#d92f4b;font-weight:700}.cta{display:inline-block;margin:18px 0;padding:12px 18px;border-radius:10px;background:#111;color:#fff;text-decoration:none}footer{margin-top:64px;padding-top:20px;border-top:1px solid #ddd}</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ReplyZero is a Chrome extension for YouTube creators that finds comments your channel has not replied to yet.">
+  <meta name="theme-color" content="#0f1115">
+
+  <title>ReplyZero - Your YouTube unanswered comment inbox</title>
+
+  <style>
+    :root{
+      --bg:#0c0e12;
+      --panel:#13161c;
+      --panel-2:#181c23;
+      --text:#f7f8fa;
+      --muted:#a9b0bd;
+      --line:#262b34;
+      --accent:#ff4d67;
+      --accent-2:#ff7588;
+      --green:#64d58b;
+      --shadow:0 24px 70px rgba(0,0,0,.32);
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    html{
+      scroll-behavior:smooth;
+    }
+
+    body{
+      margin:0;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+
+      background:
+        radial-gradient(
+          circle at 80% -10%,
+          rgba(255,77,103,.18),
+          transparent 32rem
+        ),
+        radial-gradient(
+          circle at -10% 30%,
+          rgba(93,108,255,.10),
+          transparent 28rem
+        ),
+        var(--bg);
+
+      color:var(--text);
+      line-height:1.6;
+    }
+
+    a{
+      color:inherit;
+    }
+
+    .wrap{
+      width:min(1120px,calc(100% - 40px));
+      margin:auto;
+    }
+
+    nav{
+      position:sticky;
+      top:0;
+      z-index:20;
+
+      backdrop-filter:blur(14px);
+
+      background:rgba(12,14,18,.78);
+
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+
+    .nav-inner{
+      height:70px;
+
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+
+      gap:24px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+
+      gap:11px;
+
+      text-decoration:none;
+
+      font-weight:800;
+      letter-spacing:-.02em;
+    }
+
+    .brand-mark{
+      width:34px;
+      height:34px;
+
+      border-radius:10px;
+
+      display:grid;
+      place-items:center;
+
+      background:linear-gradient(
+        135deg,
+        var(--accent),
+        #ff3153
+      );
+
+      box-shadow:
+        0 8px 24px rgba(255,77,103,.28);
+
+      font-size:15px;
+    }
+
+    .nav-links{
+      display:flex;
+      align-items:center;
+
+      gap:22px;
+
+      font-size:14px;
+      color:var(--muted);
+    }
+
+    .nav-links a{
+      text-decoration:none;
+    }
+
+    .nav-links a:hover{
+      color:var(--text);
+    }
+
+    .button{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+
+      gap:8px;
+
+      min-height:46px;
+
+      padding:0 18px;
+
+      border-radius:12px;
+      border:1px solid var(--line);
+
+      text-decoration:none;
+
+      font-weight:700;
+
+      transition:.18s ease;
+    }
+
+    .button:hover{
+      transform:translateY(-1px);
+    }
+
+    .button.primary{
+      background:var(--text);
+      color:#0b0d11;
+      border-color:var(--text);
+    }
+
+    .button.secondary{
+      background:rgba(255,255,255,.03);
+    }
+
+    .hero{
+      padding:90px 0 72px;
+
+      display:grid;
+      grid-template-columns:1.08fr .92fr;
+
+      align-items:center;
+
+      gap:68px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+
+      gap:8px;
+
+      padding:7px 11px;
+
+      border-radius:999px;
+
+      border:1px solid rgba(255,255,255,.09);
+
+      background:rgba(255,255,255,.035);
+
+      color:#d3d8e0;
+
+      font-size:13px;
+      font-weight:700;
+
+      margin-bottom:22px;
+    }
+
+    .dot{
+      width:7px;
+      height:7px;
+
+      border-radius:50%;
+
+      background:var(--green);
+
+      box-shadow:
+        0 0 16px rgba(100,213,139,.7);
+    }
+
+    h1{
+      margin:0 0 22px;
+
+      max-width:760px;
+
+      font-size:clamp(48px,7vw,78px);
+
+      line-height:.98;
+
+      letter-spacing:-.055em;
+    }
+
+    .hero p{
+      max-width:660px;
+
+      font-size:19px;
+
+      color:var(--muted);
+
+      margin:0;
+    }
+
+    .hero-actions{
+      margin-top:30px;
+
+      display:flex;
+      flex-wrap:wrap;
+
+      gap:12px;
+    }
+
+    .mini-note{
+      margin-top:18px;
+
+      font-size:13px;
+
+      color:#7f8795;
+    }
+
+    .mockup{
+      padding:14px;
+
+      background:rgba(255,255,255,.04);
+
+      border:1px solid rgba(255,255,255,.08);
+
+      border-radius:24px;
+
+      box-shadow:var(--shadow);
+
+      transform:rotate(1.5deg);
+    }
+
+    .app{
+      overflow:hidden;
+
+      border-radius:17px;
+
+      background:#f7f8fa;
+
+      color:#15171b;
+    }
+
+    .app-top{
+      padding:17px 18px;
+
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+
+      border-bottom:1px solid #e4e7eb;
+    }
+
+    .app-brand{
+      font-weight:850;
+    }
+
+    .pill{
+      padding:5px 9px;
+
+      border-radius:999px;
+
+      background:#e9fff0;
+
+      color:#18773a;
+
+      font-weight:800;
+      font-size:11px;
+    }
+
+    .app-tabs{
+      padding:13px 16px 8px;
+
+      display:flex;
+
+      gap:8px;
+
+      font-size:12px;
+    }
+
+    .app-tab{
+      padding:6px 9px;
+
+      border-radius:8px;
+
+      background:#15171b;
+
+      color:white;
+
+      font-weight:700;
+    }
+
+    .app-tab.off{
+      background:#eceef1;
+      color:#616875;
+    }
+
+    .comment{
+      margin:8px 14px 12px;
+
+      padding:14px;
+
+      border:1px solid #e1e4e8;
+
+      border-radius:12px;
+
+      background:white;
+    }
+
+    .comment-meta{
+      display:flex;
+      justify-content:space-between;
+
+      gap:12px;
+
+      font-size:11px;
+
+      color:#7a818d;
+
+      margin-bottom:7px;
+    }
+
+    .comment strong{
+      font-size:13px;
+    }
+
+    .comment p{
+      font-size:13px;
+
+      color:#3e444d;
+
+      margin:6px 0 12px;
+    }
+
+    .actions{
+      display:flex;
+
+      gap:7px;
+    }
+
+    .tiny{
+      padding:6px 8px;
+
+      border-radius:7px;
+
+      font-size:10px;
+      font-weight:750;
+
+      border:1px solid #d9dde3;
+
+      background:#f8f9fa;
+    }
+
+    section{
+      padding:76px 0;
+    }
+
+    .section-head{
+      max-width:680px;
+
+      margin-bottom:34px;
+    }
+
+    .kicker{
+      color:var(--accent-2);
+
+      font-size:13px;
+
+      letter-spacing:.12em;
+
+      text-transform:uppercase;
+
+      font-weight:850;
+    }
+
+    h2{
+      font-size:clamp(34px,5vw,50px);
+
+      line-height:1.06;
+
+      letter-spacing:-.04em;
+
+      margin:8px 0 12px;
+    }
+
+    .section-head p,
+    .muted{
+      color:var(--muted);
+    }
+
+    .grid-3{
+      display:grid;
+
+      grid-template-columns:repeat(3,1fr);
+
+      gap:16px;
+    }
+
+    .card{
+      background:
+        linear-gradient(
+          180deg,
+          rgba(255,255,255,.045),
+          rgba(255,255,255,.025)
+        );
+
+      border:1px solid rgba(255,255,255,.08);
+
+      border-radius:18px;
+
+      padding:24px;
+    }
+
+    .card-icon{
+      width:38px;
+      height:38px;
+
+      border-radius:11px;
+
+      display:grid;
+      place-items:center;
+
+      background:rgba(255,77,103,.12);
+
+      color:#ff8a9b;
+
+      margin-bottom:16px;
+
+      font-weight:900;
+    }
+
+    .card h3{
+      margin:0 0 8px;
+
+      font-size:18px;
+    }
+
+    .card p{
+      margin:0;
+
+      color:var(--muted);
+
+      font-size:15px;
+    }
+
+    .steps{
+      display:grid;
+
+      grid-template-columns:repeat(3,1fr);
+
+      gap:28px;
+
+      counter-reset:step;
+    }
+
+    .step{
+      position:relative;
+
+      padding-top:50px;
+    }
+
+    .step:before{
+      counter-increment:step;
+
+      content:"0" counter(step);
+
+      position:absolute;
+
+      top:0;
+      left:0;
+
+      color:#636b78;
+
+      font-weight:900;
+
+      letter-spacing:.08em;
+    }
+
+    .step h3{
+      margin:0 0 8px;
+    }
+
+    .step p{
+      color:var(--muted);
+
+      margin:0;
+    }
+
+    .trust{
+      display:grid;
+
+      grid-template-columns:1fr 1fr;
+
+      gap:18px;
+
+      align-items:stretch;
+    }
+
+    .trust .card{
+      padding:30px;
+    }
+
+    .check{
+      display:flex;
+
+      gap:11px;
+
+      margin-top:16px;
+
+      color:#d9dde4;
+    }
+
+    .check span:first-child{
+      color:var(--green);
+
+      font-weight:900;
+    }
+
+    .pricing{
+      display:grid;
+
+      grid-template-columns:1fr 1fr;
+
+      gap:18px;
+
+      max-width:860px;
+    }
+
+    .price-card{
+      border-radius:20px;
+
+      padding:30px;
+
+      border:1px solid rgba(255,255,255,.09);
+
+      background:rgba(255,255,255,.035);
+    }
+
+    .price-card.featured{
+      border-color:rgba(255,77,103,.5);
+
+      background:
+        linear-gradient(
+          180deg,
+          rgba(255,77,103,.11),
+          rgba(255,255,255,.035)
+        );
+
+      box-shadow:
+        0 20px 55px rgba(255,77,103,.08);
+    }
+
+    .price{
+      font-size:42px;
+
+      font-weight:900;
+
+      letter-spacing:-.04em;
+
+      margin:8px 0 2px;
+    }
+
+    .price small{
+      font-size:15px;
+
+      color:var(--muted);
+
+      font-weight:600;
+    }
+
+    .price-list{
+      padding:0;
+
+      list-style:none;
+
+      margin:24px 0 0;
+    }
+
+    .price-list li{
+      padding:8px 0;
+
+      color:#d8dce3;
+    }
+
+    .price-list li:before{
+      content:"✓";
+
+      color:var(--green);
+
+      margin-right:9px;
+
+      font-weight:900;
+    }
+
+    .faq{
+      display:grid;
+
+      grid-template-columns:1fr 1fr;
+
+      gap:14px;
+    }
+
+    details{
+      background:rgba(255,255,255,.035);
+
+      border:1px solid rgba(255,255,255,.08);
+
+      border-radius:14px;
+
+      padding:17px 19px;
+    }
+
+    summary{
+      cursor:pointer;
+
+      font-weight:750;
+    }
+
+    details p{
+      color:var(--muted);
+
+      margin:12px 0 0;
+
+      font-size:14px;
+    }
+
+    .closing{
+      text-align:center;
+
+      padding:85px 0 95px;
+    }
+
+    .closing p{
+      color:var(--muted);
+
+      max-width:600px;
+
+      margin:0 auto 24px;
+    }
+
+    footer{
+      border-top:1px solid rgba(255,255,255,.08);
+
+      padding:30px 0 44px;
+
+      color:#858d9b;
+
+      font-size:13px;
+    }
+
+    .footer-inner{
+      display:flex;
+
+      justify-content:space-between;
+
+      gap:20px;
+
+      flex-wrap:wrap;
+    }
+
+    .footer-links{
+      display:flex;
+
+      gap:18px;
+    }
+
+    .footer-links a{
+      text-decoration:none;
+    }
+
+    .footer-links a:hover{
+      color:var(--text);
+    }
+
+    @media (max-width:820px){
+
+      .nav-links a:not(.nav-cta){
+        display:none;
+      }
+
+      .hero{
+        grid-template-columns:1fr;
+
+        padding-top:64px;
+
+        gap:44px;
+      }
+
+      .mockup{
+        transform:none;
+
+        max-width:560px;
+      }
+
+      .grid-3,
+      .steps{
+        grid-template-columns:1fr;
+      }
+
+      .trust,
+      .pricing,
+      .faq{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width:520px){
+
+      .wrap{
+        width:min(100% - 28px,1120px);
+      }
+
+      h1{
+        font-size:47px;
+      }
+
+      .hero p{
+        font-size:17px;
+      }
+
+      section{
+        padding:58px 0;
+      }
+
+      .nav-cta{
+        display:none;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<p class="tag">CREATOR INBOX</p>
-<h1>Find YouTube comments you forgot to reply to.</h1>
-<p>ReplyZero is a Chrome extension for YouTube creators. It scans comments on your channel, surfaces comments that have no reply from your channel, and lets you keep track of comments you've handled.</p>
-<p><strong>Free:</strong> up to 20 unlocked unanswered comments. <strong>Pro:</strong> all unanswered comments for €5.99/month.</p>
-<p>ReplyZero 1.0.0 reads the YouTube data required for the inbox feature. It does not post, edit, or delete comments or other YouTube content.</p>
-<footer>
-  <a href="privacy-policy.html">Privacy Policy</a> · <a href="https://github.com/MrReese2342/ReplyZero/issues/new">Support</a>
-</footer>
+
+  <nav>
+    <div class="wrap nav-inner">
+
+      <a class="brand" href="/">
+        <span class="brand-mark">RZ</span>
+        <span>ReplyZero</span>
+      </a>
+
+      <div class="nav-links">
+
+        <a href="#features">
+          Features
+        </a>
+
+        <a href="#how">
+          How it works
+        </a>
+
+        <a href="#pricing">
+          Pricing
+        </a>
+
+        <a href="#privacy">
+          Privacy
+        </a>
+
+        <a
+          class="button secondary nav-cta"
+          href="https://github.com/MrReese2342/ReplyZero/issues/new"
+        >
+          Support
+        </a>
+
+      </div>
+    </div>
+  </nav>
+
+  <main>
+
+    <div class="wrap hero">
+
+      <div>
+
+        <div class="eyebrow">
+          <span class="dot"></span>
+          Built for YouTube creators
+        </div>
+
+        <h1>
+          Never leave a good comment hanging.
+        </h1>
+
+        <p>
+          ReplyZero turns your unanswered YouTube comments into a clean inbox.
+          Find the conversations your channel has not replied to yet,
+          handle them, and move on.
+        </p>
+
+        <div class="hero-actions">
+
+          <a
+            class="button primary"
+            href="#pricing"
+          >
+            See plans
+          </a>
+
+          <a
+            class="button secondary"
+            href="#how"
+          >
+            How ReplyZero works
+          </a>
+
+        </div>
+
+        <div class="mini-note">
+          Chrome extension · Google OAuth · Free plan available
+        </div>
+
+      </div>
+
+      <div
+        class="mockup"
+        aria-label="Illustration of the ReplyZero extension interface"
+      >
+
+        <div class="app">
+
+          <div class="app-top">
+
+            <div class="app-brand">
+              ReplyZero
+            </div>
+
+            <div class="pill">
+              CONNECTED
+            </div>
+
+          </div>
+
+          <div class="app-tabs">
+
+            <div class="app-tab">
+              Inbox
+            </div>
+
+            <div class="app-tab off">
+              Handled
+            </div>
+
+            <div class="app-tab off">
+              Newest
+            </div>
+
+          </div>
+
+          <div class="comment">
+
+            <div class="comment-meta">
+
+              <strong>
+                @footballfan92
+              </strong>
+
+              <span>
+                2h ago · 14 likes
+              </span>
+
+            </div>
+
+            <p>
+              What match should you cover next?
+              This channel is a goldmine 🔥
+            </p>
+
+            <div class="actions">
+
+              <span class="tiny">
+                Open on YouTube
+              </span>
+
+              <span class="tiny">
+                Mark handled
+              </span>
+
+            </div>
+
+          </div>
+
+          <div class="comment">
+
+            <div class="comment-meta">
+
+              <strong>
+                @retromatches
+              </strong>
+
+              <span>
+                Yesterday · 7 likes
+              </span>
+
+            </div>
+
+            <p>
+              I completely forgot how intense this game was.
+            </p>
+
+            <div class="actions">
+
+              <span class="tiny">
+                Open on YouTube
+              </span>
+
+              <span class="tiny">
+                Mark handled
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <section id="features">
+
+      <div class="wrap">
+
+        <div class="section-head">
+
+          <span class="kicker">
+            Creator inbox
+          </span>
+
+          <h2>
+            Less comment hunting.
+            More actual replying.
+          </h2>
+
+          <p>
+            ReplyZero keeps the important stuff in one place instead
+            of making you dig through individual videos.
+          </p>
+
+        </div>
+
+        <div class="grid-3">
+
+          <article class="card">
+
+            <div class="card-icon">
+              01
+            </div>
+
+            <h3>
+              Find unanswered comments
+            </h3>
+
+            <p>
+              Scan your channel and surface comments that have not
+              received a reply from your channel.
+            </p>
+
+          </article>
+
+          <article class="card">
+
+            <div class="card-icon">
+              02
+            </div>
+
+            <h3>
+              Keep track of what matters
+            </h3>
+
+            <p>
+              Mark comments as handled when no reply is needed and
+              keep that state between sessions.
+            </p>
+
+          </article>
+
+          <article class="card">
+
+            <div class="card-icon">
+              03
+            </div>
+
+            <h3>
+              Jump straight to YouTube
+            </h3>
+
+            <p>
+              Open the original comment on YouTube whenever you want
+              to continue the conversation there.
+            </p>
+
+          </article>
+
+          <article class="card">
+
+            <div class="card-icon">
+              04
+            </div>
+
+            <h3>
+              Sort your backlog
+            </h3>
+
+            <p>
+              Order comments by newest, oldest or most liked so you
+              can work through the inbox your way.
+            </p>
+
+          </article>
+
+          <article class="card">
+
+            <div class="card-icon">
+              05
+            </div>
+
+            <h3>
+              Stay connected
+            </h3>
+
+            <p>
+              ReplyZero restores your authenticated YouTube session
+              when possible, so reopening the extension stays
+              friction-light.
+            </p>
+
+          </article>
+
+          <article class="card">
+
+            <div class="card-icon">
+              06
+            </div>
+
+            <h3>
+              Built around one job
+            </h3>
+
+            <p>
+              No social dashboard maze. ReplyZero is deliberately
+              focused on one question: who have you not replied to yet?
+            </p>
+
+          </article>
+
+        </div>
+
+      </div>
+    </section>
+
+    <section id="how">
+
+      <div class="wrap">
+
+        <div class="section-head">
+
+          <span class="kicker">
+            How it works
+          </span>
+
+          <h2>
+            From scattered comments to one tidy queue.
+          </h2>
+
+        </div>
+
+        <div class="steps">
+
+          <div class="step">
+
+            <h3>
+              Connect YouTube
+            </h3>
+
+            <p>
+              Authorize ReplyZero through Google OAuth so it can
+              identify your channel and retrieve the data required
+              for the inbox.
+            </p>
+
+          </div>
+
+          <div class="step">
+
+            <h3>
+              Scan your comments
+            </h3>
+
+            <p>
+              ReplyZero checks comment threads and replies to determine
+              which conversations your channel has not answered.
+            </p>
+
+          </div>
+
+          <div class="step">
+
+            <h3>
+              Clear the queue
+            </h3>
+
+            <p>
+              Open comments on YouTube to reply, or mark them handled
+              when they do not need a response.
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <section id="privacy">
+
+      <div class="wrap">
+
+        <div class="section-head">
+
+          <span class="kicker">
+            Privacy & trust
+          </span>
+
+          <h2>
+            Your creator inbox should not become another data vacuum.
+          </h2>
+
+        </div>
+
+        <div class="trust">
+
+          <div class="card">
+
+            <h3>
+              What ReplyZero does
+            </h3>
+
+            <div class="check">
+              <span>✓</span>
+              <span>
+                Uses Google OAuth and the YouTube Data API to power
+                the creator inbox.
+              </span>
+            </div>
+
+            <div class="check">
+              <span>✓</span>
+              <span>
+                Stores recent scan and handled-state data in Chrome
+                extension storage.
+              </span>
+            </div>
+
+            <div class="check">
+              <span>✓</span>
+              <span>
+                Uses ExtensionPay and Stripe for subscription status
+                and checkout.
+              </span>
+            </div>
+
+          </div>
+
+          <div class="card">
+
+            <h3>
+              What ReplyZero does not do
+            </h3>
+
+            <div class="check">
+              <span>✓</span>
+              <span>
+                It does not post, edit or delete YouTube comments
+                or other YouTube content.
+              </span>
+            </div>
+
+            <div class="check">
+              <span>✓</span>
+              <span>
+                It does not sell your YouTube data or use it
+                for advertising.
+              </span>
+            </div>
+
+            <div class="check">
+              <span>✓</span>
+              <span>
+                It does not store your full payment-card details.
+              </span>
+            </div>
+
+            <p style="margin-top:22px">
+
+              <a href="privacy-policy.html">
+                Read the full Privacy Policy →
+              </a>
+
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <section id="pricing">
+
+      <div class="wrap">
+
+        <div class="section-head">
+
+          <span class="kicker">
+            Pricing
+          </span>
+
+          <h2>
+            Start free. Unlock the full backlog when you need it.
+          </h2>
+
+        </div>
+
+        <div class="pricing">
+
+          <div class="price-card">
+
+            <strong>
+              Free
+            </strong>
+
+            <div class="price">
+              €0
+            </div>
+
+            <p class="muted">
+              For trying ReplyZero on a real channel.
+            </p>
+
+            <ul class="price-list">
+
+              <li>
+                Up to 20 unlocked unanswered comments
+              </li>
+
+              <li>
+                Inbox and handled views
+              </li>
+
+              <li>
+                Open comments on YouTube
+              </li>
+
+              <li>
+                Sort by newest, oldest or likes
+              </li>
+
+            </ul>
+
+          </div>
+
+          <div class="price-card featured">
+
+            <strong>
+              Pro
+            </strong>
+
+            <div class="price">
+              €5.99
+              <small>/ month</small>
+            </div>
+
+            <p class="muted">
+              For creators with a backlog worth clearing.
+            </p>
+
+            <ul class="price-list">
+
+              <li>
+                Unlimited unanswered comments
+              </li>
+
+              <li>
+                Everything in Free
+              </li>
+
+              <li>
+                Subscription access restored across sessions
+              </li>
+
+              <li>
+                Cancel through the subscription provider
+              </li>
+
+            </ul>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <section>
+
+      <div class="wrap">
+
+        <div class="section-head">
+
+          <span class="kicker">
+            FAQ
+          </span>
+
+          <h2>
+            A few things worth knowing.
+          </h2>
+
+        </div>
+
+        <div class="faq">
+
+          <details>
+
+            <summary>
+              Does ReplyZero reply to comments automatically?
+            </summary>
+
+            <p>
+              No. ReplyZero helps you find the comments that still
+              need attention. Replies are made on YouTube.
+            </p>
+
+          </details>
+
+          <details>
+
+            <summary>
+              Does ReplyZero modify or delete YouTube content?
+            </summary>
+
+            <p>
+              No. The current ReplyZero functionality uses YouTube
+              access to identify your channel, retrieve comment
+              threads and replies, and display related video
+              information. It does not post, edit or delete YouTube
+              content.
+            </p>
+
+          </details>
+
+          <details>
+
+            <summary>
+              What happens when I mark a comment as handled?
+            </summary>
+
+            <p>
+              It moves out of your active inbox so you can keep the
+              queue focused on comments that still need your attention.
+            </p>
+
+          </details>
+
+          <details>
+
+            <summary>
+              Why is there a paid plan?
+            </summary>
+
+            <p>
+              The Free plan is capped at 20 unlocked unanswered
+              comments. Pro removes that limit for creators with
+              larger backlogs.
+            </p>
+
+          </details>
+
+          <details>
+
+            <summary>
+              Do I need to reconnect every time?
+            </summary>
+
+            <p>
+              ReplyZero attempts to restore your authorized YouTube
+              session when you reopen the extension. If Google
+              authorization has expired or been revoked, you may be
+              asked to connect again.
+            </p>
+
+          </details>
+
+          <details>
+
+            <summary>
+              How do I get support?
+            </summary>
+
+            <p>
+              Use the ReplyZero GitHub support page linked below.
+              Please avoid posting sensitive account information
+              in public issues.
+            </p>
+
+          </details>
+
+        </div>
+
+      </div>
+    </section>
+
+    <section class="closing">
+
+      <div class="wrap">
+
+        <span class="kicker">
+          ReplyZero
+        </span>
+
+        <h2>
+          Turn “I’ll reply later” into an empty inbox.
+        </h2>
+
+        <p>
+          Built for creators who care about their audience but do not
+          want to babysit every video's comment section.
+        </p>
+
+        <a
+          class="button primary"
+          href="#pricing"
+        >
+          View pricing
+        </a>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer>
+
+    <div class="wrap footer-inner">
+
+      <div>
+        © 2026 ReplyZero. Built for YouTube creators.
+      </div>
+
+      <div class="footer-links">
+
+        <a href="privacy-policy.html">
+          Privacy
+        </a>
+
+        <a href="https://github.com/MrReese2342/ReplyZero/issues/new">
+          Support
+        </a>
+
+        <a href="https://github.com/MrReese2342/ReplyZero">
+          GitHub
+        </a>
+
+      </div>
+
+    </div>
+
+  </footer>
+
 </body>
 </html>

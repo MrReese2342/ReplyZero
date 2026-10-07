@@ -367,6 +367,48 @@
       margin:6px 0 12px;
     }
 
+    .stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  padding:14px 14px 6px;
+  }
+
+  .stat{
+    padding:12px 10px;
+    border-radius:10px;
+    background:#ffffff;
+    border:1px solid #e1e4e8;
+  }
+
+  .stat-value{
+    display:block;
+    font-size:20px;
+    line-height:1;
+    font-weight:900;
+    letter-spacing:-.04em;
+    color:#15171b;
+  }
+
+  .stat-label{
+    display:block;
+    margin-top:6px;
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    font-weight:800;
+    color:#8a919d;
+  }
+
+  .stat.primary{
+    background:#fff1f3;
+    border-color:#ffd3da;
+  }
+
+  .stat.primary .stat-value{
+    color:#d92f4b;
+  }
+
     .actions{
       display:flex;
 
@@ -882,6 +924,40 @@
             </div>
 
           </div>
+
+          <div class="stats">
+
+      <div class="stat primary">
+        <span class="stat-value">
+          327
+        </span>
+
+        <span class="stat-label">
+          Unanswered
+        </span>
+      </div>
+
+      <div class="stat">
+        <span class="stat-value">
+          184
+        </span>
+
+        <span class="stat-label">
+          Handled
+        </span>
+      </div>
+
+      <div class="stat">
+        <span class="stat-value">
+          511
+        </span>
+
+        <span class="stat-label">
+          Scanned
+        </span>
+      </div>
+
+    </div>
 
           <div class="comment">
 
